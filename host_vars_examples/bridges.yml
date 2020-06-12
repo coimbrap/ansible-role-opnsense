@@ -1,0 +1,9 @@
+opn_bridges:
+  - descr: Ipv6 dans la DMZ
+    settings:
+      - key: bridgeif
+        value: bridge0
+      - key: proto
+        value: rstp
+      - key: members
+        value: ['opt2','opt9']
