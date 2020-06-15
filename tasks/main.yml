@@ -90,6 +90,10 @@
   include: nat.yml
   tags: nat
 
+- name: radvd
+  include: radvd.yml
+  tags: radvd
+
 - name: laggs
   include: laggs.yml
   tags: laggs
