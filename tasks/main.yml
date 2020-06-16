@@ -108,7 +108,9 @@
 
 - name: clean,safe delete
   delegate_to: localhost
-  shell: rm /tmp/config-{{ inventory_hostname }}.xml
+  file:
+    path: /tmp/config-{{ inventory_hostname }}.xml
+    state: absent
   tags: clean
 
 - name: reload
