@@ -1,5 +1,4 @@
-ansible-opnsense
-=========
+# Ansible role - OPNsense 
 
 Ansible role to configure OPNsense firewalls
 
@@ -19,7 +18,7 @@ Dependencies
     sudo pip install lxml
     sudo pip3 install lxml
     sudo apt install secure-delete
-    
+
 Example Playbook
 ----------------
 
@@ -48,6 +47,7 @@ Author Information
 - Rudi Broekhuizen - rudi.broekhuizen@naturalis.nl
 - Privazio - hello@privaz.io - https://github.com/privazio
 - Foppe Pieters - foppe.pieters@naturalis.nl
-**2020-...***
-- pcoimbra
+
+**2020-...**
+- coimbrap
 - mablr
