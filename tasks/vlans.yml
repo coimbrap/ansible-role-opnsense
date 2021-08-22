@@ -1,7 +1,7 @@
 - name: vlans - create vlans
   delegate_to: localhost
   xml:
-    path: /tmp/config-{{ inventory_hostname }}.xml
+    path: "{{ local_config_path }}"
     xpath: /opnsense/vlans/vlan[tag/text()="{{ item.0.tag }}"]/{{ item.1.key }}
     value: "{{ item.1.value }}"
     pretty_print: yes

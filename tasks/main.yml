@@ -15,7 +15,7 @@
 - name: user
   include: user.yml
   tags: user
-  
+
 - name: group
   include: group.yml
   tags: group
@@ -47,12 +47,12 @@
 - name: vlans
   include: vlans.yml
   tags: vlans
-  #when: opn_interfaces_vlan_parent_interface is defined
+  when: opn_interfaces_vlan_parent_interface is defined
 
 - name: bridges
   include: bridges.yml
   tags: bridges
-  
+
 - name: virtualip
   include: virtualip.yml
   tags: virtualip
@@ -64,11 +64,11 @@
 - name: filter
   include: filter.yml
   tags: filter
-  
+
 - name: gateways
   include: gateways.yml
   #when: prod | default([])
-  tags: gateways 
+  tags: gateways
 
 - name: hasync
   include: hasync.yml
@@ -98,19 +98,37 @@
   include: laggs.yml
   tags: laggs
 
+- name: trim EOF
+  delegate_to: localhost
+  lineinfile:
+    state: absent
+    insertafter: EOF
+    line: ""
+    path: "{{ local_config_path }}"
+  changed_when: false
+  tags: trim
+
+- name: fix xml start tag
+  delegate_to: localhost
+  lineinfile:
+    line: '<?xml version="1.0"?>'
+    regexp: '^<\?xml.*>'
+    insertbefore: BOF
+    path: "{{ local_config_path }}"
+  changed_when: false
+  tags: trim
+
 - name: copy
   copy:
-    src: /tmp/config-{{ inventory_hostname }}.xml
-    dest: /conf/config.xml
+    src: "{{ local_config_path }}"
+    dest: "{{ config_path }}"
     backup: yes
   register: config
   tags: copy
 
 - name: clean,safe delete
   delegate_to: localhost
-  file:
-    path: /tmp/config-{{ inventory_hostname }}.xml
-    state: absent
+  shell: srm "{{ local_config_path }}"
   tags: clean
 
 - name: reload
