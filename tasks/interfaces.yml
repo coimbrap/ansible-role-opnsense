@@ -14,7 +14,7 @@
 - name: interfaces - settings that apply to all interfaces
   delegate_to: localhost
   xml:
-    path: /tmp/config-{{ inventory_hostname }}.xml
+    path: "{{ local_config_path }}"
     xpath: "/opnsense/interfaces/{{ item.1 }}/{{ item.0.key }}"
     value: "{{ item.0.value }}"
     pretty_print: yes
