@@ -1,15 +1,55 @@
 ---
-- name: interfaces - settings specific for an interface
+- name: interfaces - remove interface
   delegate_to: localhost
   xml:
     path: /tmp/config-{{ inventory_hostname }}.xml
+    xpath: /opnsense/interfaces/{{ item }}
+    state: absent
+    pretty_print: yes
+  with_items: "{{ opn_interfaces_remove }}"
+  when: opn_interfaces_remove is defined
+
+- name: interfaces - settings specific for an interface
+  delegate_to: localhost
+  xml:
+    path: "{{ local_config_path }}"
     xpath: /opnsense/interfaces/{{ item.0.interface }}/{{ item.1.key }}
     value: "{{ item.1.value }}"
     pretty_print: yes
   with_subelements:
     - "{{ opn_interfaces_specific }}"
     - settings
-  when: opn_interfaces_specific is defined
+  when:
+    - opn_interfaces_specific is defined
+    - item.1.key != 'enable'
+
+- name: interfaces - settings specific for enabling interfaces
+  delegate_to: localhost
+  xml:
+    path: "{{ local_config_path }}"
+    xpath: /opnsense/interfaces/{{ item.0.interface }}/{{ item.1.key }}
+    value: "{{ item.1.value }}"
+    pretty_print: yes
+  with_subelements:
+    - "{{ opn_interfaces_specific }}"
+    - settings
+  when:
+    - opn_interfaces_specific is defined
+    - item.1.key == 'enable' and item.1.value == 1
+
+- name: interfaces - settings specific for disabled interfaces
+  delegate_to: localhost
+  xml:
+    path: "{{ local_config_path }}"
+    xpath: /opnsense/interfaces/{{ item.0.interface }}/{{ item.1.key }}
+    state: absent
+    pretty_print: yes
+  with_subelements:
+    - "{{ opn_interfaces_specific }}"
+    - settings
+  when:
+    - opn_interfaces_specific is defined
+    - item.1.key == 'enable' and item.1.value == 0
 
 - name: interfaces - settings that apply to all interfaces
   delegate_to: localhost
@@ -23,17 +63,34 @@
     - interfaces
   when: opn_interfaces_all is defined
 
+- name: interfaces - set vlan parent interface
+  delegate_to: localhost
+  xml:
+    path: "{{ local_config_path }}"
+    xpath: /opnsense/interfaces/{{ item.0.interface }}/if
+    value: "{{ item.0.vlan_parent_interface | default(opn_interfaces_vlan_parent_interface) }}_vlan{{ item.0.vlan }}"
+    pretty_print: yes
+  with_subelements:
+    - "{{ opn_interfaces_specific }}"
+    - settings
+  when: opn_interfaces_specific is defined and item.0.vlan is defined
 
-#- name: interfaces - set vlan parent interface
-#  delegate_to: localhost
-#  xml:
-#    path: /tmp/config-{{ inventory_hostname }}.xml
-#    xpath: /opnsense/interfaces/{{ item.0.interface }}/if
-#    value: "{{ opn_interfaces_vlan_parent_interface }}_vlan{{ item.0.vlan }}"
-#    pretty_print: yes
-#  with_subelements:
-#    - "{{ opn_interfaces_specific }}"
-#    - settings
-#  when: opn_interfaces_specific is defined and item.0.vlan is defined
+- name: create ifgroups
+  delegate_to: localhost
+  xml:
+    path: "{{ local_config_path }}"
+    xpath: /opnsense/ifgroups
+    state: present
+    pretty_print: yes
+  when: opn_ifgroups is defined
 
+- name: create ifgroupentry
+  delegate_to: localhost
+  xml:
+    path: "{{ local_config_path }}"
+    xpath: /opnsense/ifgroups
+    set_children: "[ {% for ifgroupentry in opn_ifgroups -%}'<ifgroupentry>{% for k,v in ifgroupentry.iteritems() -%}<{{ k }}>{{ v }}</{{ k }}>{%- endfor %}</ifgroupentry>',{%- endfor %} ]"
+    input_type: xml
+    pretty_print: yes
+  when: opn_ifgroups is defined
 ...
