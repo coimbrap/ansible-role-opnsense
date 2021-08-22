@@ -1,0 +1,72 @@
+---
+- name: unbound - general
+  delegate_to: localhost
+  xml:
+    path: "{{ local_config_path }}"
+    xpath: "/opnsense/unbound/{{ item.key }}"
+    value: "{{ item.value }}"
+    pretty_print: yes
+  with_dict: "{{ opn_unbound_general | default([]) }}"
+
+- name: unbound - hosts
+  delegate_to: localhost
+  xml:
+    path: "{{ local_config_path }}"
+    xpath: /opnsense/unbound/hosts[descr/text()="{{ item.0.host }}"]/{{ item.1.key }}
+    value: "{{ item.1.value }}"
+    pretty_print: yes
+  with_subelements:
+    - "{{ opn_unbound_hosts | default([]) }}"
+    - settings
+
+- name: unbound - port forward
+  delegate_to: localhost
+  xml:
+    path: "{{ local_config_path }}"
+    xpath: /opnsense/unbound/domainoverrides[descr/text()="{{ item.0.domain }}"]/{{ item.1.key }}
+    value: "{{ item.1.value }}"
+    pretty_print: yes
+  with_subelements:
+    - "{{ opn_unbound_domainoverrides | default([]) }}"
+    - settings
+
+
+#opn_unbound_general:
+#  - key: enable
+#    value: 1
+#  - key: dnssec
+#    value: 1
+#  - key: noreglladdr6
+#    value: 1
+#  - key: active_interface
+#    value: "lan,opt1,opt2,opt3"
+#  - key: outgoing_interface
+#    value: "wan"
+#opn_unbound_hosts:
+#  - host: opn
+#    settings:
+#      - key: domain
+#        value: devo.re
+#      - key: rr
+#        value: A
+#      - key: ip
+#        value: 10.0.20.254
+#  - host: pve
+#    settings:
+#      - key: domain
+#        value: devo.re
+#      - key: rr
+#        value: A
+#      - key: ip
+#        value: 10.0.10.254
+#opn_unbound_domainoverrides:
+#  - domain: loan
+#    settings:
+#      - key: ip
+#        value: 10.0.20.10
+#  - domain: loane
+#    settings:
+#      - key: ip
+#        value: 10.0.20.20
+
+...
