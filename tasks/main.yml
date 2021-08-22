@@ -94,6 +94,10 @@
   include: radvd.yml
   tags: radvd
 
+- name: unbound
+  include: unbound.yml
+  tags: unbound
+
 - name: laggs
   include: laggs.yml
   tags: laggs
